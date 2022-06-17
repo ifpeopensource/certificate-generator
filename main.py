@@ -11,6 +11,10 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfMerger
 
+from src.log import Log
+
+logger = Log()
+
 
 @click.command()
 @click.argument('output_file_path', nargs=1, required=False, default="./output/certificates.pdf")
@@ -30,11 +34,27 @@ def main(output_file_path: str, model: str, names: str, output_dir: str, align: 
     options['font_size'] = font_size
     options['color'] = color
 
+    if (Path(output_dir).exists() and os.listdir(output_dir) != 0):
+        logger.error(f"Output directory '{output_dir}' is not empty")
+        return
+
+    if (not Path(names).exists()):
+        logger.error(f"Names file '{names}' does not exist")
+        return
+
+    if (not Path(model).exists()):
+        logger.error(f"Model file '{model}' does not exist")
+        return
+
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(Path(output_dir).joinpath('pptx'), exist_ok=True)
 
     with open(names, encoding='utf8') as file:
         lines = file.readlines()
+        if (len(lines) == 0):
+            logger.error(f"Names file '{names}' is empty")
+            return
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             for name in lines:

@@ -4,3 +4,4 @@ output
 *.pptx
 !model.example.pptx
 names.txt
+__pycache__
