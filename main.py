@@ -26,7 +26,8 @@ def mergePDFs(file_paths: list) -> None:
     for file_path in file_paths:
         merger.append(file_path)
 
-    output_path = sys.argv[1] or "./output/certificate.pdf"
+    output_path = sys.argv[1] if len(
+        sys.argv) >= 2 else "./output/certificates.pdf"
     merger.write(output_path)
     merger.close()
 
