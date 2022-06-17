@@ -1,17 +1,15 @@
 import os
 from pathlib import Path
 import glob
-import subprocess
 import concurrent.futures
 from typing import Dict
 import click
-from pptx import Presentation
 from pptx.enum.text import PP_ALIGN
-from pptx.util import Pt
-from pptx.dml.color import RGBColor
-from PyPDF2 import PdfFileReader, PdfFileWriter, PdfMerger
 
 from src.log import Log
+from src.generatePPTX import generatePPTX
+from src.PPTXtoPDF import PPTXtoPDF
+from src.mergePDFs import mergePDFs
 
 logger = Log()
 
@@ -80,73 +78,8 @@ def handleAlignOption(align: str):
 
 
 def generateCertificate(model: str, name: str, options: Dict[str, str], output_dir: str):
-    pptx_path = genSlide(name, model, options, output_dir)
+    pptx_path = generatePPTX(name, model, options, output_dir)
     PPTXtoPDF(pptx_path, output_dir)
-
-
-def mergePDFs(file_paths: list, output_path: str) -> None:
-    merger = PdfMerger()
-    for file_path in file_paths:
-        merger.append(file_path)
-
-    merger.addMetadata({
-        "/Author": 'IFPE Open Source',
-        "/Title": "Certificates",
-        "/Subject": "Certificates generated using IFPE Open Source Certificate Generator\nCertificados gerados usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator",
-        "/Creator": "IFPE Open Source Certificate Generator",
-    })
-
-    merger.write(output_path)
-    merger.close()
-
-
-def PPTXtoPDF(file_path: str, dir: str) -> None:
-    subprocess.run(["libreoffice", "--headless", "--convert-to",
-                   "pdf", "--outdir", dir, file_path], stdout=subprocess.DEVNULL)
-
-    generated_file_path = Path(dir).joinpath(
-        Path(file_path).stem + ".pdf")
-
-    reader = PdfFileReader(generated_file_path)
-    writer = PdfFileWriter()
-
-    writer.append_pages_from_reader(reader)
-    writer.addMetadata({
-        "/Author": 'IFPE Open Source',
-        "/Title": f"Certificate for {Path(file_path).stem}",
-        "/Subject": "Certificate generated using IFPE Open Source Certificate Generator\nCertificado gerado usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator",
-        "/Creator": "IFPE Open Source Certificate Generator",
-    })
-
-    with open(generated_file_path, "wb") as fp:
-        writer.write(fp)
-
-
-def genSlide(name: str, model: str, options: Dict[str, str], output_dir: str) -> str:
-    prs = Presentation(model)
-    slide = prs.slides[0]
-
-    for shape in slide.shapes:
-        if not shape.has_text_frame:
-            continue
-
-        frame = shape.text_frame
-
-        if "{{name}}" in frame.text:
-            frame.alignment = options['align']
-            frame.text = frame.text.replace("{{name}}", name)
-
-            for paragraph in frame.paragraphs:
-                paragraph.font.size = Pt(options['font_size'])
-                paragraph.font.color.rgb = RGBColor.from_string(
-                    options['color'])
-
-    file_path = Path(output_dir).joinpath(f"pptx/{name}.pptx")
-    prs.core_properties.title = f"Certificate for {name}"
-    prs.core_properties.author = "IFPE Open Source"
-    prs.core_properties.comments = "Certificate generated using IFPE Open Source Certificate Generator\nCertificado gerado usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator"
-    prs.save(file_path)
-    return file_path
 
 
 if __name__ == '__main__':
