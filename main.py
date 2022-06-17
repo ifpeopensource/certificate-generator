@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import glob
 import subprocess
+import concurrent.futures
 from typing import Dict
 import click
 from pptx import Presentation
@@ -34,13 +35,17 @@ def main(output_file_path: str, model: str, names: str, output_dir: str, align: 
 
     with open(names, encoding='utf8') as file:
         lines = file.readlines()
-        for name in lines:
-            print(f"Generating {name.strip()} certificate")
-            pptx_path = genSlide(name.strip(), model, options, output_dir)
-            PPTXtoPDF(pptx_path, output_dir)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = []
+            for name in lines:
+                print(f"Generating certificate for {name}")
+                futures.append(executor.submit(
+                    generateCertificate, model, name.strip(), options, output_dir))
 
+    print("All certificates generated. Merging...")
     file_paths = glob.glob(f"{output_dir}/*.pdf")
     mergePDFs(file_paths, output_file_path)
+    print("Done.")
 
 
 def handleAlignOption(align: str):
@@ -52,6 +57,11 @@ def handleAlignOption(align: str):
         return PP_ALIGN.RIGHT
     else:
         return None
+
+
+def generateCertificate(model: str, name: str, options: Dict[str, str], output_dir: str):
+    pptx_path = genSlide(name, model, options, output_dir)
+    PPTXtoPDF(pptx_path, output_dir)
 
 
 def mergePDFs(file_paths: list, output_path: str) -> None:
@@ -72,7 +82,7 @@ def mergePDFs(file_paths: list, output_path: str) -> None:
 
 def PPTXtoPDF(file_path: str, dir: str) -> None:
     subprocess.run(["libreoffice", "--headless", "--convert-to",
-                   "pdf", "--outdir", dir, file_path])
+                   "pdf", "--outdir", dir, file_path], stdout=subprocess.DEVNULL)
 
     generated_file_path = Path(dir).joinpath(
         Path(file_path).stem + ".pdf")
