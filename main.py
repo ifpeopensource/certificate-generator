@@ -19,7 +19,7 @@ logger = Log()
 @click.option('--model', '-m', default="./model.pptx", help="Model file path", show_default=True)
 @click.option('--names', '-n', default="./names.txt", help="Names file path", show_default=True)
 @click.option('--output-dir', '-o', default="./output", help="Output directory", show_default=True)
-@click.option('--align', '-a', default="left", help="Paragraph alignment", show_default=True, type=click.Choice(['left', 'center', 'right']))
+@click.option('--align', '-a', default="left", help="Paragraph alignment", show_default=True, type=click.Choice(['left', 'center', 'right', 'justify']))
 @click.option('--font-size', '-f', default=18, help="Font size", show_default=True, type=int)
 @click.option('--color', '-c', default="000000", help="Font color", show_default=True)
 def main(output_file_path: str, model: str, names: str, output_dir: str, align: str, font_size: int, color: str) -> None:
@@ -73,6 +73,8 @@ def handleAlignOption(align: str):
         return PP_ALIGN.CENTER
     elif align == "right":
         return PP_ALIGN.RIGHT
+    elif align == "justify":
+        return PP_ALIGN.JUSTIFY
     else:
         return None
 

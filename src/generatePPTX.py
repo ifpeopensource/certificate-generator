@@ -16,10 +16,10 @@ def generatePPTX(name: str, model: str, options: Dict[str, str], output_dir: str
         frame = shape.text_frame
 
         if "{{name}}" in frame.text:
-            frame.alignment = options['align']
             frame.text = frame.text.replace("{{name}}", name)
 
             for paragraph in frame.paragraphs:
+                paragraph.alignment = options['align']
                 paragraph.font.size = Pt(options['font_size'])
                 paragraph.font.color.rgb = RGBColor.from_string(
                     options['color'])
