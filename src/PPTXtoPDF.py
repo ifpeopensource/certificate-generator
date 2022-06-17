@@ -1,4 +1,4 @@
-from asyncio import subprocess
+import subprocess
 from pathlib import Path
 
 from PyPDF2 import PdfFileReader, PdfFileWriter
@@ -6,7 +6,7 @@ from PyPDF2 import PdfFileReader, PdfFileWriter
 
 def PPTXtoPDF(file_path: str, dir: str) -> None:
     subprocess.run(["libreoffice", "--headless", "--convert-to",
-                   "pdf", "--outdir", dir, file_path], stdout=subprocess.DEVNULL)
+                "pdf", "--outdir", dir, file_path], stdout=subprocess.DEVNULL)
 
     generated_file_path = Path(dir).joinpath(
         Path(file_path).stem + ".pdf")
