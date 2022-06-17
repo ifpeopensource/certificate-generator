@@ -1,9 +1,10 @@
 import os
+from pathlib import Path
 import sys
 import glob
 import subprocess
 from pptx import Presentation
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfFileReader, PdfFileWriter, PdfMerger
 
 
 def main():
@@ -26,15 +27,38 @@ def mergePDFs(file_paths: list) -> None:
     for file_path in file_paths:
         merger.append(file_path)
 
+    merger.addMetadata({
+        "/Author": 'IFPE Open Source',
+        "/Title": "Certificates",
+        "/Subject": "Certificates generated using IFPE Open Source Certificate Generator\nCertificados gerados usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator",
+        "/Creator": "IFPE Open Source Certificate Generator",
+    })
+
     output_path = sys.argv[1] if len(
         sys.argv) >= 2 else "./output/certificates.pdf"
     merger.write(output_path)
     merger.close()
 
 
-def PPTXtoPDF(file_path: str) -> None:
+def PPTXtoPDF(origin_file_path: str) -> None:
     subprocess.run(["libreoffice", "--headless", "--convert-to",
-                   "pdf", "--outdir", "./output", file_path])
+                   "pdf", "--outdir", "./output", origin_file_path])
+
+    generated_file_path = f"./output/{Path(origin_file_path).stem}.pdf"
+
+    reader = PdfFileReader(generated_file_path)
+    writer = PdfFileWriter()
+
+    writer.append_pages_from_reader(reader)
+    writer.addMetadata({
+        "/Author": 'IFPE Open Source',
+        "/Title": f"Certificate for {Path(origin_file_path).stem}",
+        "/Subject": "Certificate generated using IFPE Open Source Certificate Generator\nCertificado gerado usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator",
+        "/Creator": "IFPE Open Source Certificate Generator",
+    })
+
+    with open(generated_file_path, "wb") as fp:
+        writer.write(fp)
 
 
 def genSlide(name: str, model: str) -> str:
@@ -50,6 +74,9 @@ def genSlide(name: str, model: str) -> str:
                 paragraph.text = paragraph.text.replace("{{name}}", name)
 
     file_path = f"./output/pptx/{name}.pptx"
+    prs.core_properties.title = f"Certificate for {name}"
+    prs.core_properties.author = "IFPE Open Source"
+    prs.core_properties.comments = "Certificate generated using IFPE Open Source Certificate Generator\nCertificado gerado usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator"
     prs.save(file_path)
     return file_path
 
