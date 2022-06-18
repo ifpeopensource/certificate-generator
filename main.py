@@ -80,6 +80,37 @@ def generateCertificate(model: str, name: str, options: Dict[str, str], output_d
     pptx_path = generatePPTX(name, model, options, output_dir)
     PPTXtoPDF(pptx_path, output_dir)
 
+def validate_cpf(number):
+    """
+    Check and validate if a number is a valid CPF
+
+    Parameters
+    ----------
+        number: a number of cpf to validate. It can be formatted or not.
+
+    Returns
+    -------
+        bool: True if is valid, False if is not valid
+    """
+    # Check if it is a number and ignores any character in between
+    cpf = [int(char) for char in number if char.isdigit()]
+
+    #  Check length
+    if len(cpf) != 11:
+        return False
+
+    # Check if CPF has the same digits, e.g.: 111.111.111-11
+    # Necessary for the validation algorithm
+    if cpf == cpf[::-1]:
+        return False
+
+    # Check if CPF is valid by calculating the validation digits
+    for i in range(9, 11):
+        value = sum((cpf[num] * ((i+1) - num) for num in range(0, i)))
+        digit = ((value * 10) % 11) % 10
+        if digit != cpf[i]:
+            return False
+    return True
 
 if __name__ == '__main__':
     main()
