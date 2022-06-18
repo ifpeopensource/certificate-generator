@@ -5,7 +5,7 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 
 
-def generatePPTX(name: str, model: str, options: Dict[str, str], output_dir: str) -> str:
+def generatePPTX(name: str, model: str, options: Dict[str, str], output_dir: str, cpf: str = None) -> str:
     prs = Presentation(model)
     slide = prs.slides[0]
 
@@ -23,6 +23,10 @@ def generatePPTX(name: str, model: str, options: Dict[str, str], output_dir: str
                 paragraph.font.size = Pt(options['font_size'])
                 paragraph.font.color.rgb = RGBColor.from_string(
                     options['color'])
+
+        if cpf is not None:
+            if "{{cpf}}" in frame.text:
+                frame.text = frame.text.replace("{{cpf}}", cpf)
 
     file_path = Path(output_dir).joinpath(f"pptx/{name}.pptx")
     prs.core_properties.title = f"Certificate for {name}"

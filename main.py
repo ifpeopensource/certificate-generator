@@ -53,9 +53,21 @@ def main(output_file_path: str, model: str, names: str, output_dir: str, align: 
     if (len(lines) == 0):
         logger.error(f"Names file '{names}' is empty")
         return
+    cpf = None
     for name in lines:
+        if cpf_enabled:
+            words = name.split()
+            try:
+                name = ' '.join([number for number in words if not validate_cpf(number)])
+                cpf = [number for number in words if validate_cpf(number)][0]
+            except IndexError:
+                logger.error(f"{name} CPF is invalid!")
+                cpf = None
+                # TODO: Generate even if CPF is invalid?
+                return
+
         print(f"Generating certificate for {name}")
-        generateCertificate(model, name.strip(), options, output_dir)
+        generateCertificate(model, name.strip(), options, output_dir, cpf)
 
     print("All certificates generated. Merging...")
     file_paths = glob.glob(f"{output_dir}/*.pdf")
@@ -76,8 +88,10 @@ def handleAlignOption(align: str):
         return None
 
 
-def generateCertificate(model: str, name: str, options: Dict[str, str], output_dir: str):
-    pptx_path = generatePPTX(name, model, options, output_dir)
+def generateCertificate(model: str, name: str, options: Dict[str, str], 
+                        output_dir: str,
+                        cpf: str = None):
+    pptx_path = generatePPTX(name, model, options, output_dir, cpf)
     PPTXtoPDF(pptx_path, output_dir)
 
 def validate_cpf(number):
