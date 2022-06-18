@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 import glob
-import concurrent.futures
 from typing import Dict
 import click
 from pptx.enum.text import PP_ALIGN
@@ -52,13 +51,9 @@ def main(output_file_path: str, model: str, names: str, output_dir: str, align: 
         if (len(lines) == 0):
             logger.error(f"Names file '{names}' is empty")
             return
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = []
-            for name in lines:
-                print(f"Generating certificate for {name}")
-                futures.append(executor.submit(
-                    generateCertificate, model, name.strip(), options, output_dir))
+        for name in lines:
+            print(f"Generating certificate for {name}")
+            generateCertificate(model, name.strip(), options, output_dir)
 
     print("All certificates generated. Merging...")
     file_paths = glob.glob(f"{output_dir}/*.pdf")
