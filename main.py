@@ -21,7 +21,8 @@ logger = Log()
 @click.option('--align', '-a', default="left", help="Paragraph alignment", show_default=True, type=click.Choice(['left', 'center', 'right', 'justify']))
 @click.option('--font-size', '-f', default=18, help="Font size", show_default=True, type=int)
 @click.option('--color', '-c', default="000000", help="Font color", show_default=True)
-def main(output_file_path: str, model: str, names: str, output_dir: str, align: str, font_size: int, color: str) -> None:
+@click.option('--cpf-enable', 'cpf_enabled', is_flag=True, default=False, help="Enables CPF", show_default=True, type=bool)
+def main(output_file_path: str, model: str, names: str, output_dir: str, align: str, font_size: int, color: str, cpf_enabled: bool) -> None:
     """ Generates certificates from a model PPTX file and a list of names.
 
         OUTPUT_FILE_PATH: Path to the output PDF file with the certificates. (default: ./output/certificates.pdf)
