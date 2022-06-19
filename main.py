@@ -64,7 +64,6 @@ def main(output_file_path: str, model: str, names: str, output_dir: str, align: 
                 logger.error(f"{name} CPF is invalid!")
                 cpf = None
                 # TODO: Generate even if CPF is invalid?
-                return
 
         print(f"Generating certificate for {name}")
         generateCertificate(model, name.strip(), options, output_dir, cpf)
