@@ -24,11 +24,13 @@ def generatePPTX(name: str, model: str, options: Dict[str, str], output_dir: str
                 paragraph.font.color.rgb = RGBColor.from_string(
                     options['color'])
 
+        cpf_hidden = ""
         if cpf is not None:
             if "{{cpf}}" in frame.text:
                 frame.text = frame.text.replace("{{cpf}}", cpf)
+                cpf_hidden = "-" + cpf[0:3]
 
-    file_path = Path(output_dir).joinpath(f"pptx/{name}.pptx")
+    file_path = Path(output_dir).joinpath(f"pptx/{name}{cpf_hidden}.pptx")
     prs.core_properties.title = f"Certificate for {name}"
     prs.core_properties.author = "IFPE Open Source"
     prs.core_properties.comments = "Certificate generated using IFPE Open Source Certificate Generator\nCertificado gerado usando o IFPE Open Source Certificate Generator\nhttps://github.com/ifpeopensource/certificate-generator"
