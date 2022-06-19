@@ -23,6 +23,23 @@
 
 Programa em Python para automatizar a geração de certificados PDF a partir de um modelo em PPTX (arquivo do PowerPoint).
 
+- [Certificate Generator](#certificate-generator)
+  - [Dependências](#dependências)
+    - [Como utilizar](#como-utilizar)
+      - [Opções](#opções)
+  - [Time](#time)
+  - [🤝 Contribuir](#-contribuir)
+  - [Demonstre o seu apoio](#demonstre-o-seu-apoio)
+  - [📝 Licença](#-licença)
+  - [English](#english)
+    - [Dependencies](#dependencies)
+    - [Usage](#usage)
+      - [Options](#options)
+    - [Team](#team)
+    - [🤝 Contributing](#-contributing)
+    - [Show your support](#show-your-support)
+    - [📝 License](#-license)
+
 ## Dependências
 
 Para o funcionamento do programa, é necessário ter instalado as seguintes dependências:
@@ -56,10 +73,23 @@ Para o funcionamento do programa, é necessário ter instalado as seguintes depe
   4. Rode o programa.
 
       ```console
-      python main.py ./output_file.pdf
+      python main.py -d names.txt --name-only ./output_file.pdf
       ```
 
   5. Os certificados serão gerados no diretório `./output`. Caso o parâmetro seja informado, um arquivo PDF contendo todos os certificados será gerado.
+
+#### Opções
+
+| Opção                                              |                             Descrição                              |
+| -------------------------------------------------- | :----------------------------------------------------------------: |
+| `-m, --model TEXT`                                 |         Caminho do arquivo modelo  [padrão: ./model.pptx]          |
+| `-d, --data TEXT`                                  |           Caminho do arquivo de dados  __[necessário]__            |
+| `--multiple-fields / --name-only`                  | Devem ser preenchidos múltiplos campos ou apenas os campos de nome |
+| `-o, --output-dir TEXT`                            |               Diretório de saída  [padrão: ./output]               |
+| `-a, --align [left \| center \| right \| justify]` |              Alinhamento do parágrafo  [padrão: left]              |
+| `-f, --font-size INTEGER`                          |                   Tamanho da fonte  [padrão: 18]                   |
+| `-c, --color TEXT`                                 |                   Cor da fonte  [padrão: 000000]                   |
+| `--help`                                           |                     Exibe a mensagem de ajuda                      |
 
 ## Time
 
@@ -124,10 +154,23 @@ For the program to work, it is necessary to have installed the following depende
   4. Run the program
 
       ```console
-      python main.py ./output_file.pdf
+      python main.py -d names.txt --name-only ./output_file.pdf
       ```
 
   5. The output files will be generated in the `./output` directory. If the parameter is informed, a PDF file containing all the certificates will be generated.
+
+#### Options
+
+| Option                                             |                      Description                       |
+| -------------------------------------------------- | :----------------------------------------------------: |
+| `-m, --model TEXT`                                 |        Model file path  [default: ./model.pptx]        |
+| `-d, --data TEXT`                                  |             Data file path  __[required]__             |
+| `--multiple-fields / --name-only`                  | Whether to fill in multiple fields or just name fields |
+| `-o, --output-dir TEXT`                            |         Output directory  [default: ./output]          |
+| `-a, --align [left \| center \| right \| justify]` |          Paragraph alignment  [default: left]          |
+| `-f, --font-size INTEGER`                          |                Font size  [default: 18]                |
+| `-c, --color TEXT`                                 |             Font color  [default: 000000]              |
+| `--help`                                           |                   Show help message                    |
 
 ### Team
 
