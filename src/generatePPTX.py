@@ -5,7 +5,7 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 
 
-def generatePPTX(model: str, fields: List[str], data: List[str], options: Dict[str, str], output_dir: str) -> str:
+def generatePPTX(model: str, fields: List[str], data: List[str], options: Dict[str, str], output_dir: str) -> Path:
     prs = Presentation(model)
     slide = prs.slides[0]
 

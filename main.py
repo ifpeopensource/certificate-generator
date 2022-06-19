@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import glob
 import shutil
+import concurrent.futures
 from typing import Dict, List
 import click
 from pptx.enum.text import PP_ALIGN
@@ -73,21 +74,27 @@ def main(
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(Path(output_dir).joinpath('pptx'), exist_ok=True)
 
-    if multiple_fields:
-        parsed_data = readCSVConfig(data)
-        for value_row in parsed_data['values']:
-            print(f"Generating certificate for {value_row[0]}")
-            generateCertificate(model, parsed_data['fields'],
-                                value_row, options, output_dir)
-    else:
-        parsed_data = readTXTConfig(data)
-        for name in parsed_data:
-            print(f"Generating certificate for {name}")
-            generateCertificate(model, ['name'], [name], options, output_dir)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = []
+        if multiple_fields:
+            parsed_data = readCSVConfig(data)
+            for value_row in parsed_data['values']:
+                print(f"Generating certificate for {value_row[0]}")
+                futures.append(executor.submit(
+                generateCertificate, model, parsed_data['fields'],
+                                    value_row, options, output_dir))
+        else:
+            parsed_data = readTXTConfig(data)
+            for name in parsed_data:
+                print(f"Generating certificate for {name}")
+                futures.append(executor.submit(
+                generateCertificate, model, ['name'], [name], options, output_dir))
 
     print("All certificates generated. Merging...")
     file_paths = glob.glob(f"{output_dir}/*.pdf")
     mergePDFs(file_paths, output_file_path)
+    print("Cleaning tmp files...")
+    shutil.rmtree("./tmp")
     print("Done.")
 
 
