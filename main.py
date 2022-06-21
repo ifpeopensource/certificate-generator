@@ -5,7 +5,6 @@ import shutil
 import concurrent.futures
 from typing import Dict, List
 import click
-from pptx.enum.text import PP_ALIGN
 
 from src.log import Log
 from src.generatePPTX import generatePPTX
@@ -51,7 +50,7 @@ def main(
         OUTPUT_FILE_PATH: Path to the output PDF file with the certificates. (default: ./output/certificates.pdf)
     """
     options = {}
-    options['align'] = handleAlignOption(align)
+    options['align'] = align
     options['font_size'] = font_size
     options['color'] = color
 
@@ -74,21 +73,25 @@ def main(
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(Path(output_dir).joinpath('pptx'), exist_ok=True)
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = []
-        if multiple_fields:
-            parsed_data = readCSVConfig(data)
-            for value_row in parsed_data['values']:
-                print(f"Generating certificate for {value_row[0]}")
-                futures.append(executor.submit(
-                generateCertificate, model, parsed_data['fields'],
-                                    value_row, options, output_dir))
-        else:
-            parsed_data = readTXTConfig(data)
-            for name in parsed_data:
-                print(f"Generating certificate for {name}")
-                futures.append(executor.submit(
-                generateCertificate, model, ['name'], [name], options, output_dir))
+    try:
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            futures = []
+            if multiple_fields:
+                parsed_data = readCSVConfig(data)
+                for value_row in parsed_data['values']:
+                    print(f"Generating certificate for {value_row[0]}")
+                    futures.append(executor.submit(
+                    generateCertificate, model, parsed_data['fields'],
+                                        value_row, options, output_dir))
+            else:
+                parsed_data = readTXTConfig(data)
+                for name in parsed_data:
+                    print(f"Generating certificate for {name}")
+                    futures.append(executor.submit(
+                    generateCertificate, model, ['name'], [name], options, output_dir))
+    except Exception as e:
+        print(e)
+        print(type(e))
 
     print("All certificates generated. Merging...")
     file_paths = glob.glob(f"{output_dir}/*.pdf")
@@ -98,20 +101,7 @@ def main(
     print("Done.")
 
 
-def handleAlignOption(align: str):
-    if align == "left":
-        return PP_ALIGN.LEFT
-    elif align == "center":
-        return PP_ALIGN.CENTER
-    elif align == "right":
-        return PP_ALIGN.RIGHT
-    elif align == "justify":
-        return PP_ALIGN.JUSTIFY
-    else:
-        return None
-
-
-def generateCertificate(model: str, fields: List[str], data: List[str], options: Dict[str, str], output_dir: str):
+def generateCertificate(model: str, fields: List[str], data: List[str], options, output_dir: str):
     pptx_path = generatePPTX(model, fields, data, options, output_dir)
     PPTXtoPDF(pptx_path, output_dir)
 

@@ -3,9 +3,22 @@ from typing import Dict, List
 from pptx import Presentation
 from pptx.util import Pt
 from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
 
+def handleAlignOption(align: str):
+    if align == "left":
+        return PP_ALIGN.LEFT
+    elif align == "center":
+        return PP_ALIGN.CENTER
+    elif align == "right":
+        return PP_ALIGN.RIGHT
+    elif align == "justify":
+        return PP_ALIGN.JUSTIFY
+    else:
+        return None
 
-def generatePPTX(model: str, fields: List[str], data: List[str], options: Dict[str, str], output_dir: str) -> Path:
+def generatePPTX(model: str, fields: List[str], data: List[str], options, output_dir: str) -> Path:
+    align = handleAlignOption(options['align'])
     prs = Presentation(model)
     slide = prs.slides[0]
 
@@ -21,7 +34,7 @@ def generatePPTX(model: str, fields: List[str], data: List[str], options: Dict[s
                 frame.text = frame.text.replace(field_placeholder, data[field_index])
 
                 for paragraph in frame.paragraphs:
-                    paragraph.alignment = options['align']
+                    paragraph.alignment = align
                     paragraph.font.size = Pt(options['font_size'])
                     paragraph.font.color.rgb = RGBColor.from_string(
                         options['color'])
