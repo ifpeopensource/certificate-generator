@@ -4,12 +4,21 @@ from pathlib import Path
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
 
-def PPTXtoPDF(file_path: str, dir: str) -> None:
-    subprocess.run(["libreoffice", "--headless", "--convert-to",
-                "pdf", "--outdir", dir, file_path], stdout=subprocess.DEVNULL)
+def PPTXtoPDF(file_path: Path, dir: str) -> None:
 
-    generated_file_path = Path(dir).joinpath(
-        Path(file_path).stem + ".pdf")
+    dir: Path = Path(dir).resolve()
+
+    # TODO Improve tmpfolder generation
+    tmpfolder = str(dir.parent) + "/tmp/" + "".join(str(file_path.stem).split()[0] + str(file_path.stem).split()[-1]) + "/0/"
+    
+    
+    subprocess.run(["libreoffice", "--headless", "--convert-to",
+                "pdf", "--outdir", str(dir), file_path,
+                f"-env:UserInstallation=file://{tmpfolder}"], stdout=subprocess.DEVNULL)
+
+
+    generated_file_path = dir.joinpath(
+        file_path.stem + ".pdf")
 
     reader = PdfFileReader(generated_file_path)
     writer = PdfFileWriter()
